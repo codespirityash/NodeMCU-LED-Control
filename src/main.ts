@@ -11,12 +11,17 @@ async function toggleLED(state: boolean) {
         
         if (data.led) {
             statusText.innerText = "LED is ON";
+            statusText.classList.remove("off");
+            statusText.classList.add("on");
         } else {
             statusText.innerText = "LED is OFF";
+            statusText.classList.remove("on");
+            statusText.classList.add("off");
         }
     } catch (error) {
         console.error("Error:", error);
         statusText.innerText = "Error connecting to NodeMCU";
+        statusText.classList.remove("on", "off");
     }
 }
 
