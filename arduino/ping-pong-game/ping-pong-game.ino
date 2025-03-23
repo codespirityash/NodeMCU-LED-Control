@@ -11,15 +11,15 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 class Ball {
 public:
     int x, y;
-    float vel_x, vel_y; 
+    float vel_x, vel_y;
     int radius;
     unsigned long startTime;
 
     Ball() {
         x = 10;
         y = 10;
-        vel_x = 1;
-        vel_y = 1;
+        vel_x = 1.0;
+        vel_y = 1.0;
         radius = 3;
         startTime = millis();
     }
@@ -29,26 +29,35 @@ public:
         y += vel_y;
     }
 
-    void checkWallCollision() {
-        if (x - radius <= 0) {
-            vel_x = -vel_x;
+    void increaseVelocity() {
+        unsigned long elapsedTime = (millis() - startTime) / 1000;
+        float speedIncrease = 0.1 * elapsedTime;
+
+        if (vel_x > 0) {
+            vel_x = 1.0 + speedIncrease;
+        } else {
+            vel_x = -1.0 - speedIncrease;
         }
-        if (y - radius <= 0 || y + radius >= SCREEN_HEIGHT) {
-            vel_y = -vel_y;
+
+        if (vel_y > 0) {
+            vel_y = 1.0 + speedIncrease;
+        } else {
+            vel_y = -1.0 - speedIncrease;
         }
     }
 
-    void increaseVelocity() {
-        float increment = 0.1; 
-        unsigned long elapsed = (millis() - startTime) / 1000;
-
-        if (elapsed % 5 == 0 && elapsed > 0) { 
-            if (vel_x > 0) vel_x += increment;
-            else vel_x -= increment;
-
-            if (vel_y > 0) vel_y += increment;
-            else vel_y -= increment;
-            startTime += 5000; 
+    void checkWallCollision() {
+        if (x - radius <= 0) {
+            x = radius;
+            vel_x = -vel_x;
+        }
+        if (y - radius <= 0) {
+            y = radius;
+            vel_y = -vel_y;
+        }
+        if (y + radius >= SCREEN_HEIGHT) {
+            y = SCREEN_HEIGHT - radius;
+            vel_y = -vel_y;
         }
     }
 
@@ -93,6 +102,7 @@ void resetGame() {
 
 void checkCollision() {
     if (ball.x + ball.radius > player.x && ball.y > player.y && ball.y < player.y + player.height) {
+        ball.x = player.x - ball.radius;
         ball.vel_x = -ball.vel_x;
     }
 
@@ -130,9 +140,9 @@ void loop() {
 
     if (!gameOver) {
         player.updatePosition();
+        ball.increaseVelocity(); 
         ball.move();
         ball.checkWallCollision();
-        ball.increaseVelocity();
         checkCollision();
 
         ball.draw();
