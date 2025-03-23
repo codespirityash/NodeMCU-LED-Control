@@ -11,7 +11,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 class Ball {
 public:
     int x, y;
-    int vel_x, vel_y;
+    float vel_x, vel_y; 
     int radius;
     unsigned long startTime;
 
@@ -35,6 +35,20 @@ public:
         }
         if (y - radius <= 0 || y + radius >= SCREEN_HEIGHT) {
             vel_y = -vel_y;
+        }
+    }
+
+    void increaseVelocity() {
+        float increment = 0.1; 
+        unsigned long elapsed = (millis() - startTime) / 1000;
+
+        if (elapsed % 5 == 0 && elapsed > 0) { 
+            if (vel_x > 0) vel_x += increment;
+            else vel_x -= increment;
+
+            if (vel_y > 0) vel_y += increment;
+            else vel_y -= increment;
+            startTime += 5000; 
         }
     }
 
@@ -118,6 +132,7 @@ void loop() {
         player.updatePosition();
         ball.move();
         ball.checkWallCollision();
+        ball.increaseVelocity();
         checkCollision();
 
         ball.draw();
